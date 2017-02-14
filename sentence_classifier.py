@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 import nltk
+import time
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import precision_recall_curve
@@ -80,6 +81,10 @@ def train_model(model, embeddings_lookup, hidden_W, hidden_bias, MLP_W, MLP_bias
     best_dev = 0
     avg_loss = 0
     for e in xrange(EPOCHS):
+
+
+        start = time.time()
+
         print 'starting epoch {}'.format(e)
 
         # randomize the training set
@@ -119,6 +124,8 @@ def train_model(model, embeddings_lookup, hidden_W, hidden_bias, MLP_W, MLP_bias
             model.save('best_model.txt')
 
         print 'epoch: {} avg. loss: {} dev acc.: {} best dev acc.:{}'.format(e, avg_loss, dev_score, best_dev)
+        end = time.time()
+        print 'epoch took {} seconds'.format(end - start)
 
         if patience > 10:
             return
