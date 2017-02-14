@@ -9,7 +9,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import precision_recall_curve
 from sklearn.linear_model import LogisticRegressionCV, LogisticRegression
 
-# import spacy
 
 UNK = 'UNK'
 EOS = 'EOS'
