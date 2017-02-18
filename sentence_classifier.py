@@ -274,6 +274,52 @@ def log_reg_baseline(train_sents, train_labels, dev_sents, dev_labels, test_sent
     print 'log reg test precision: {}'.format(accuracy)
 
 
+def keras_example(train_sents, train_labels, dev_sents, dev_labels, test_sents, test_labels, word2int):
+    from keras.models import Sequential
+    from keras.layers import Dense, Dropout, Activation
+    from keras.layers import Embedding
+    from keras.layers import LSTM
+    from keras.datasets import imdb
+    from keras.preprocessing import sequence
+
+    vocab_size = len(word2int)
+    maxlen = max(len(s) for s in train_sents)
+
+    X_train = sents2ints(train_sents, word2int)
+    X_train = sequence.pad_sequences(X_train, maxlen=maxlen)
+
+    X_test = sents2ints(test_sents, word2int)
+    X_test = sequence.pad_sequences(X_test, maxlen=maxlen)
+
+    model = Sequential()
+    model.add(Embedding(vocab_size, INPUT_DIM, input_length=maxlen))
+    model.add(LSTM(output_dim=HIDDEN_DIM))
+    # model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['accuracy'])
+
+    model.fit(X_train, train_labels, batch_size=16, nb_epoch=1)
+
+    score = model.evaluate(X_test, test_labels, batch_size=16)
+    print 'keras test score: {}'.format(score)
+
+
+def sents2ints(train_sents, word2int):
+    X_train = []
+    for sent in train_sents:
+        s = []
+        for w in sent:
+            if w in word2int:
+                s.append(word2int[w])
+            else:
+                s.append(word2int[UNK])
+        X_train.append(s)
+    return X_train
+
 
 def main():
     train = False
@@ -281,6 +327,8 @@ def main():
     train_sents, train_labels, dev_sents, dev_labels, test_sents, test_labels, word2int = load_data()
 
     log_reg_baseline(train_sents, train_labels, dev_sents, dev_labels, test_sents, test_labels, word2int)
+
+    keras_example(train_sents, train_labels, dev_sents, dev_labels, test_sents, test_labels, word2int)
 
     # create the network (single layer lstm with 1-hidden mlp, binary softmax)
     model, embeddings_lookup, hidden_W, hidden_bias, MLP_W, MLP_bias, encoder_lstm = build_model(word2int)
